@@ -1,1 +1,196 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vinacafe Đà Lạt – VNC Coffee Chatbox</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .video-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2;
+      overflow: hidden;
+    }
+
+    .video-background iframe {
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+    }
+
+    .video-overlay {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5); /* 50% tối */
+      z-index: 1;
+    }
+
+    .chatbox-container {
+      position: relative;
+      z-index: 2;
+      padding: 30px;
+      max-width: 700px;
+      margin: auto;
+      color: white;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+
+    header p {
+      margin-bottom: 30px;
+      opacity: 0.85;
+    }
+
+    .chatbox {
+      background-color: rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 20px;
+      backdrop-filter: blur(5px);
+    }
+
+    .chat-log {
+      height: 300px;
+      overflow-y: auto;
+      text-align: left;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      background-color: rgba(0, 0, 0, 0.3);
+    }
+
+    .chat-log p {
+      margin: 5px 0;
+    }
+
+    .chat-log .user {
+      color: #ffd700;
+      font-weight: bold;
+    }
+
+    .chat-log .bot {
+      color: #90ee90;
+    }
+
+    form {
+      display: flex;
+      gap: 10px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      background-color: #007a33;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #005d27;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Video Background -->
+  <div class="video-background">
+    <iframe src="https://www.youtube.com/embed/qrqN6DunEtw?autoplay=1&mute=1&loop=1&playlist=qrqN6DunEtw&controls=0&modestbranding=1&rel=0&showinfo=0" frameborder="0" allowfullscreen></iframe>
+    <div class="video-overlay"></div>
+  </div>
+
+  <!-- Chatbox Content -->
+  <div class="chatbox-container">
+    <header>
+      <h1>Vinacafe Đà Lạt – VNC Coffee</h1>
+      <p>Xin chào! Tôi là trợ lý cà phê AI – sẵn sàng hỗ trợ bạn</p>
+    </header>
+
+    <div class="chatbox">
+      <div id="chat-log" class="chat-log"></div>
+      <form id="chat-form">
+        <input type="text" id="user-input" placeholder="Nhập câu hỏi..." autocomplete="off" />
+        <button type="submit">Gửi</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Script ChatGPT -->
+  <script>
+    const chatLog = document.getElementById("chat-log");
+    const chatForm = document.getElementById("chat-form");
+    const userInput = document.getElementById("user-input");
+
+    // ❗ THAY bằng OpenAI API key thật của bạn
+    const API_KEY = "YOUR_OPENAI_API_KEY_HERE";
+
+    chatForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const input = userInput.value.trim();
+      if (!input) return;
+
+      appendMessage("user", input);
+      userInput.value = "...";
+
+      try {
+        const response = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: "gpt-3.5-turbo",
+            messages: [{ role: "user", content: input }],
+          }),
+        });
+
+        const data = await response.json();
+        const reply = data.choices?.[0]?.message?.content || "Không có phản hồi.";
+        appendMessage("bot", reply);
+      } catch (error) {
+        appendMessage("bot", "Không thể kết nối đến ChatGPT API.");
+      }
+
+      userInput.value = "";
+    });
+
+    function appendMessage(sender, text) {
+      const p = document.createElement("p");
+      p.className = sender;
+      p.innerText = `${sender === "user" ? "Bạn" : "VNC"}: ${text}`;
+      chatLog.appendChild(p);
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+  </script>
+
+</body>
+</html>
 
